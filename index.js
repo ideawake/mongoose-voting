@@ -26,8 +26,8 @@ function voting (schema, options) {
 
   schema.add({
     vote: {
-      positive: [{ type: ObjectId, ref: voterModelName }],
-      negative: [{ type: ObjectId, ref: voterModelName }]
+      positive: [{ type: ObjectId, ref: voterModelName, created: {type: date,  default: Date.now}}],
+      negative: [{ type: ObjectId, ref: voterModelName, created: {type: date,  default: Date.now}}]
     }
   });
 
