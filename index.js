@@ -34,8 +34,8 @@ function voting (schema, options) {
 
   schema.add({
     voteHistory: {
-      positive: [{user: {type: ObjectId, ref: voterModelName}, created: {type: Date, default: Date.now}}],
-      negative: [{user: {type: ObjectId, ref: voterModelName}, created: {type: Date, default: Date.now}}]
+      positive: [{user: {type: ObjectId, ref: voterModelName}, timeStamp: {type: Date, default: Date.now}}],
+      negative: [{user: {type: ObjectId, ref: voterModelName}, timeStamp: {type: Date, default: Date.now}}]
     }
   });
 
@@ -44,7 +44,7 @@ function voting (schema, options) {
     // Reset vote if existed
 
     this.vote.negative.pull(user);
-    this.voteHistory.negative.pull({user:user});
+    this.voteHistory.negative.pull({user:user}); // this does not work
 
     // Upvote
     this.vote.positive.addToSet(user);
@@ -59,7 +59,7 @@ function voting (schema, options) {
   schema.methods.downvote = function downvote(user, fn) {
     // Reset vote if existed
     this.vote.positive.pull(user);
-    this.voteHistory.positive.pull({user:user});
+    this.voteHistory.positive.pull({user:user}); // this does not work
 
     // Downvote
     this.vote.negative.addToSet(user);
@@ -74,8 +74,8 @@ function voting (schema, options) {
   schema.methods.unvote = function unvote(user, fn) {
     this.vote.negative.pull(user);
     this.vote.positive.pull(user);
-    this.voteHistory.positive.pull({user:user});
-    this.voteHistory.negative.pull({user:user});
+    this.voteHistory.positive.pull({user: mongoose.Types.ObjectId(user)}); // this does not work
+    this.voteHistory.negative.pull({user: mongoose.Types.ObjectId(user)}); // this does not work
 
     // Remove from voteTimes set
 
