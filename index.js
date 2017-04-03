@@ -26,17 +26,29 @@ function voting (schema, options) {
 
   schema.add({
     vote: {
-      positive: [{ type: ObjectId, ref: voterModelName}],
-      negative: [{ type: ObjectId, ref: voterModelName}]
+      positive: [{type: ObjectId, ref: voterModelName}],
+      negative: [{type: ObjectId, ref: voterModelName}]
     }
   });
 
+
+  schema.add({
+    voteHistory: {
+      positive: [{user: {type: ObjectId, ref: voterModelName}, created: {type: Date, default: Date.now}}],
+      negative: [{user: {type: ObjectId, ref: voterModelName}, created: {type: Date, default: Date.now}}]
+    }
+  });
+
+
   schema.methods.upvote = function upvote(user, fn) {
     // Reset vote if existed
+
     this.vote.negative.pull(user);
+    this.voteHistory.negative.pull({user:user});
 
     // Upvote
     this.vote.positive.addToSet(user);
+    this.voteHistory.positive.addToSet({user: user});
 
     // If callback fn, save and return
     if (2 === arguments.length) {
@@ -47,9 +59,11 @@ function voting (schema, options) {
   schema.methods.downvote = function downvote(user, fn) {
     // Reset vote if existed
     this.vote.positive.pull(user);
+    this.voteHistory.positive.pull({user:user});
 
     // Downvote
     this.vote.negative.addToSet(user);
+    this.voteHistory.negative.addToSet({user: user});
 
     // If callback fn, save and return
     if (2 === arguments.length) {
@@ -60,6 +74,10 @@ function voting (schema, options) {
   schema.methods.unvote = function unvote(user, fn) {
     this.vote.negative.pull(user);
     this.vote.positive.pull(user);
+    this.voteHistory.positive.pull({user:user});
+    this.voteHistory.negative.pull({user:user});
+
+    // Remove from voteTimes set
 
     // If callback fn, save and return
     if (2 === arguments.length) {
